@@ -1,0 +1,205 @@
+---
+title: "Are Mentors Who Have Large Number of Citations Impact Their Protégé Performance"
+author: "Dong Shuyan"
+date: "21-DEC-2020"
+bibliography: Final.bib
+output: 
+  pdf_document:
+    latex_engine: xelatex
+link-citations: yes
+linkcolor: blue
+font-family: Times New Roman
+fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(warning = FALSE,
+               message = FALSE,
+               echo    = FALSE,
+               fig.align  = "center",
+               fig.width = 7.25,
+               fig.height = 6)
+```
+
+# Abstract
+
+AlShebli, Bedoor, Kinga Makovi & Talal Rahwan investigated relationship between early career informal mentorship in academic collaborations and junior author performance. Based on their article, it stated that mentor's number of post citations has positive relationship with post-mentorship impact of their protégés. In addition, they found that female academic paths were impacted more if protégés and mentors are in different gender [@mentor]. There are some doubts appeared about conclusions from this article related to ways authors analyzed. As a result, regression model will be built up to prove/disprove conclusions/methods in this article.  
+
+**Keywords:** Mentorship, Mentor, Protégés, Linear Regression, Gender, Citations, mentor–protégé pairs, Scientists, Big-shot, Hub Experience.
+
+
+**Git Repository:** https://github.com/Shuyan-Dong/sta304-final-assignment
+
+# Introduction
+
+In both graduate and undergraduate study period, mentorship is a very common relationship between students and professors (or post doctors) [@mentor], mentors provides instructions or advices to their protégés based on mentors' own experience. Authors in most articles include students or their mentors, there are many way to evaluate quality of academic postings, like number of citations, contributions to related area and etc.  _AlShebli, Bedoor, Kinga Makovi_ and _Talal Rahwan_ write an article to investigate factors may have big impacts to both the mentors and their protégé [@mentor].  
+
+In the article written by _AlShebli, Bedoor, Kinga Makovi_ and _Talal Rahwan_, they did data analysis to conclude that mentors' big-shot and hub experience have big impact to protégés academic posting. In addition, opposite-gender mentorship can impact women who pursue their academic area [@mentor]. Some important results from this paper can be found in the paper's link which will be mentioned in the reference.  
+
+In this article, a linear regression model will be built in one of sections to prove/disprove conclusions/methods by using the same dataset for their article.   
+
+Linear regression model is modeling the relationship between response variables and multiple predictors (e.g. _'Big-shot'_, _'Hub Experience'_).
+
+Basically, there are several sections for this critique analysis. *Methodology section:* including data reading & cleaning and linear regression model introduction. *Results section:* including data analysis and regression model interpretations *Discussion section:* Including data discussion and conclusion from all analysis, as well as critique points for the paper.  *Reference:* Including related citations that will be used in this report.
+
+
+
+# Model and Methodology.
+
+First part in the main body is about model and methodology. Input data is coming from a Git Repository ([Data](https://github.com/bedoor/Mentorship)) provided in the project requirements. In the data zip file, there are three CSV files and each of them contains millions of records. All data in these CSV files were used by @mentor, therefore, if our target is critiquing @mentor, then we need to use the same data and try to replicate their results.  However, as suggested by Daniel [@Mentorship], for speeding purpose, I decided to use 1e+05 lines instead of whole dataset that contains millions of records.  Below is a data summary for selected first 1e+05 lines. From the summary below, data quality is good. There are two character variables and seventeen numeric variables including IDs. There are 1481 missing values under "NumYearsPostMentorshipBin" which is not our interest, so we are not going to remove them.  And for each numeric variable, some statistic values are presented: mean, standard deviation, minimum, median and maximum.   
+
+
+```{r,echo=FALSE, cache=FALSE, message=FALSE,warning=FALSE}
+
+Lines <- 1e+05
+#### Workspace set-up ####
+library(janitor)
+library(skimr)
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(ggpubr)
+library(rms)
+
+
+# Load data
+raw_data <- read_csv("Data_5_9yearcutoff.csv", n_max = Lines)
+
+skim_without_charts(raw_data) %>% focus(n_missing, numeric.mean, numeric.sd, numeric.p0,
+                                        numeric.p50, numeric.p100)
+
+```
+
+
+Since this paper is focusing on the impact of the protégé during mentorship, there is a special numeric variable to measure this impact called $Avg_c5$, it is average number of citations from protégé in the accumulated five years post their publication [@mentor]. As a result, $'Avg_c5'$ will be our target variable for analyzing impacts to protégé, obviously it will also be our response variable in the linear regression model. In addition, there are several explanatory variables impacting $'Avg_c5'$ including $'AvgBigShot'$, $'AvgHub'$ and $'NumYearsPostMentorship'$ are under the scope of analysis. However, from @mentor point of view, opposite-gender mentorships can also impact protégé, however, mentors gender information is not available in the dataset, so we cannot validate the correctness of this point in the paper.  
+
+
+From the data summary above, the response variable $'Avg_c5'$ is a numeric variable and continuous. In addition, according to @mentor point of view, impact to protégé increases as $'AvgBigShot'$, $'AvgHub'$ increase, so there is a positive linear relationship between $'Avg_c5'$ and explanatory variable, otherwise, their conclusion would be wrong. As a result, a Multiple Linear Regression will be applied to our analysis. For Multiple Linear Regression [@Regression], it can be expressed as:
+
+\[
+  \begin{array}{lcl}  
+  y_i = \beta_0+\beta_1x_{1i}+\beta_2x_{2i} + ... + \beta_px_{pi} + e_i
+  \\&&\\
+  Where
+  \\&&\\
+  \beta_0\ is\ the\ constant
+  \\&&\\
+  \beta_1\ to\ \beta_p\ are\ coefficients\ of\ p\ explanatory\ variables
+  \end{array} 
+\]
+
+Considering we have three 3 explanatory variables ($p=3$) and one response variable, the Multiple Linear Regression is:
+
+\[
+  \begin{array}{lcl}  
+  Avg_c5 = \beta_0+\beta_1AvgBigShot+\beta_2AvgHub+\beta_3NumYearsPostMentorship   + e_i
+  \\&&\\
+  Where
+  \\&&\\
+  \beta_0\ is\ the\ constant
+  \\&&\\
+  \beta_1\ to\ \beta_3\ are\ coefficients\ of\ corresponding\ explanatory\ variables.
+  \end{array}
+\]
+
+In the next part of this paper, all results related to data and Multiple Linear Regression model will be presented.  
+
+
+\newpage
+
+
+# Results.
+
+In this section, we are presenting data and Multiple Linear Regression results. Firstly, we the following four plots are histogram / density plot of each target variable (one response variable and three explanatory variables).  
+
+
+```{r,echo=FALSE, cache=FALSE, message=FALSE,warning=FALSE}
+
+
+theme_set(
+  theme_bw() +
+    theme(legend.position = "top")
+  )
+
+
+Avg_c5 <- ggplot(data = raw_data, mapping = aes(x = Avg_c5)) +
+  geom_histogram(aes(y = ..density..), color = "grey30") +
+  geom_density(alpha = 0.2, fill = "antiquewhite3", color = "red")+
+  ggtitle("Distribution of Avg_c5 (Plot 1)")
+
+
+NumYearsPostMentorship <- ggplot(data = raw_data, mapping = aes(x = NumYearsPostMentorship)) +
+  geom_histogram(aes(y = ..density..), color = "grey30") +
+  geom_density(alpha = 0.2, fill = "antiquewhite3", color = "red")+
+  ggtitle("Distribution of NumYearsPostMentorship (Plot 2)")
+
+AvgBigShot <- ggplot(data = raw_data, mapping = aes(x = AvgBigShot)) +
+  geom_histogram(aes(y = ..density..), color = "grey30") +
+  geom_density(alpha = 0.2, fill = "antiquewhite3", color = "red")+
+  ggtitle("Distribution of AvgBigShot (Plot 3)")
+
+
+AvgHub <- ggplot(data = raw_data, mapping = aes(x = AvgHub)) +
+  geom_histogram(aes(y = ..density..), color = "grey30") +
+  geom_density(alpha = 0.2, fill = "antiquewhite3", color = "red")+
+  ggtitle("Distribution of AvgHub (Plot 4)")
+
+
+ggarrange(Avg_c5, NumYearsPostMentorship, AvgBigShot,AvgHub,
+                    labels = c("1", "2", "3", "4"),
+                    ncol = 2, nrow = 2)
+
+```
+
+
+
+
+From these four plots, we can see that all these four variables are heavily skewed to the right. That means all these four variables have observed values concentrated to zero (or closer to zero). For $'Avg_c5'$, $'AvgBigShot'$, $'AvgHub'$, most of their values are very close to zero, that implies number of citations for both protégé and mentors are very few for most of observations. That make us think about mentor and protégé classification criteria, is $'Avg_c5'$ data coming from real protégé? are $'AvgBigShot'$ and $'AvgHub'$ data really coming from mentors? Together with density distribution of $'NumYearsPostMentorship'$, large number of observations have $'NumYearsPostMentorship'$ greater than seven years. So we will firstly criticize the methodology about mentor and protégé identification in a paper. It is not good to use a fixed years of experience (7 years) to classify mentor or protégé.  
+
+
+```{r,echo=FALSE, cache=FALSE, message=FALSE,warning=FALSE}
+model <- ols(Avg_c5 ~ ., data = raw_data[,which(colnames(raw_data) %in%
+                                        c("Avg_c5","NumYearsPostMentorship",
+                                          "AvgBigShot", "AvgHub"))], 
+             x=T, y=T, model = T)
+
+model
+```
+
+From multiple linear regression model fitting results, I can find that all estimated coefficients have very small p-value, so we decided to use all predictors to analyze $'Avg_c5'$. Therefore, our estimated regression model is:
+
+
+\[
+  \begin{array}{lcl}  
+  \hat{Avg_c5} = 7.9385 + 0.0325*AvgBigShot -0.0013*AvgHub+0.1458 *NumYearsPostMentorship 
+  \end{array}
+\]
+
+
+From the fitted multiple linear regression model, we can find that with all explanatory variables equal to zero, expected average number of citations from protégé in the accumulated five years are 7.9. $'Avg_c5'$ and $'AvgBigShot'$ have positive relationship, with one unit increase of $'AvgBigShot'$ and keep other explanatory variables constant, expected average number of citations from protégé in the accumulated five years increase by 0.03. $'Avg_c5'$ and $'AvgBigShot'$ have negative relationship, with one unit increase of $'AvgHub'$ and keep other explanatory variables constant, expected average number of citations from protégé in the accumulated five years decrease by 0.0013. $'Avg_c5'$ and $'NumYearsPostMentorship'$ have positive relationship, with one year increase of $'NumYearsPostMentorship'$ and keep other explanatory variables constant, expected average number of citations from protégé in the accumulated five years increase by 0.1458.  
+
+In the next and final part, we will step into conclusion and related discussions.  
+
+\newpage
+
+
+
+# Discussion
+
+
+In summary, we did some data analysis using mentorship data, which is used by @mentor. In order to support their findings, data summary and plots are presented (data summary in Methodology section and density plot to target variables in Results section). From data summary in Methodology section, we raised the first critique point: missing mentor's gender information cannot support that "opposite-gender mentorships in terms of their publication potential and impact throughout their post-mentorship careers" [@mentor]. From data analysis results, we raised the second critique point: The method about mentor and protégé identification in this paper, some publication may come from mentor instead of protégé and vice versa.  
+
+Apart from data analysis, we also fit a multiple linear regression model to see impact to protégé because of $'AvgBigShot'$, $'AvgHub'$ and $'NumYearsPostMentorship'$. From model results, we agree with author's point that mentor's number of citation and number of years post mentorship can impact their protégé. However, the third critique point are raised according to model result: mentor's experience have opposite effect to the impact to protégé.   
+
+
+Furthermore, we want to discuss some problems that we identified when doing this analysis. Firstly, from data perspective, we used first 100,000 records instead of full data provided in git repository [([Data](https://github.com/bedoor/Mentorship))]. However, the paper used full data for doing analysis, hence our results may have some biases from paper's analysis, this will also impact our critique points. The way to improve this drawback is using full data to do this analysis, but considering performance (speed), we can use cluster sampling to select 100,000 observations from original dataset.  
+
+Secondly, from Multiple Linear Regression Model perspective, we fit a regression model to explain the impact to protégé from three different predictors. But from model summary in Results section, we can find that coefficient of determination ($R^2$) is very small, that means our model was not sufficiently explain variability of $'Avg_c5'$ from these predictors. In order to improve our multiple linear regression model accuracy, we can do more due diligent work about this model, for example, check whether variables need to be transformed and other diagnostics related (normality of error terms, constant of error terms and etc.).  
+
+
+Finally, another drawback exist in both mentorship paper and this report was mentioned by Jessica Hullman [@Jessica]. Does number of citations can measure the success of both mentors and protégé? In reality, it may be not always true in science area. In this paper, we also assume that impact to protégé is their average number of citations from protégé in the accumulated five years post their publication, which may be biased from reality. In order to improve this, we can do more research on it, for example do online survey to let protégé respond impact of mentorship to them and etc.  
+
+
+
+# Reference
